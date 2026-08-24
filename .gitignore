@@ -1,0 +1,35 @@
+#################################
+# Unreal Engine Generated Files #
+#################################
+/[Bb]uild/
+/[Bb]uilds/
+/Binaries/
+/DerivedDataCache/
+/Intermediate/
+/Saved/
+/.vs/
+#################################
+# Visual Studio Generated Files #
+#################################
+vs/
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.opendb
+*.opensdf
+*.sdf
+*.sln
+#################################
+# VSCode Generated Files #
+#################################
+vscode/
+**/.history
+#################################
+# Miscellaneous Generated Files #
+#################################
+*.log
+*.tmp
+*.db
