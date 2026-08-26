@@ -6,11 +6,10 @@
 #include "Camera/CameraComponent.h"
 
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "EnhancedInputSubsystems.h"
-
 #include "EnhancedInputComponent.h"
-
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
@@ -20,6 +19,11 @@ ACPlayerCharacter::ACPlayerCharacter()
 
 	ViewCam = CreateDefaultSubobject<UCameraComponent>("View Cam");
 	ViewCam->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	CameraBoom->bUsePawnControlRotation = true;
+	bUseControllerRotationYaw = false;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(720.f);
 
 }
 
@@ -42,6 +46,44 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ACPlayerCharacter::Jump);
+		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ACPlayerCharacter::HandleLookInput);
+		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ACPlayerCharacter::HandleMoveInput);
+
 	}
+	
+}
+
+
+void ACPlayerCharacter::HandleLookInput(const FInputActionValue& InputActionValue)
+{
+	FVector2D InputAction = InputActionValue.Get<FVector2D>();
+	AddControllerYawInput(InputAction.X);
+	AddControllerPitchInput(InputAction.Y);
+
+
+
+}
+
+void ACPlayerCharacter::HandleMoveInput(const struct FInputActionValue& InputActionValue)
+{
+	FVector2D InputAction = InputActionValue.Get<FVector2D>();
+	InputAction.Normalize();
+
+	AddMovementInput(GetMoveForwardDirection() * InputAction.Y + GetRightDirection() * InputAction.X);
+}
+
+FVector ACPlayerCharacter::GetRightDirection() const
+{
+	return ViewCam->GetRightVector();
+}
+
+FVector ACPlayerCharacter::GetLookForwardDirection() const
+{
+	return ViewCam->GetForwardVector();
+}
+
+FVector ACPlayerCharacter::GetMoveForwardDirection() const
+{
+	return FVector::CrossProduct(GetRightDirection(), FVector::UpVector);
 }
 
