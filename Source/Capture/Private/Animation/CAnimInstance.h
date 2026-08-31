@@ -14,7 +14,7 @@ class UCAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
-public:
+public: 
 	virtual void NativeInitializeAnimation();
 	// Native update override point. It is usually a good idea to simply gather data in this step and 
 	// for the bulk of the work to be done in NativeThreadSafeUpdateAnimation.
@@ -29,8 +29,14 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))
 	FORCEINLINE bool IsOnGround() const { return !bIsFalling; }
 
+	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))
+	FORCEINLINE float GetLookPitchOffset() const { return LookRotationOffset.Pitch; }
 
-private:
+	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))
+	FORCEINLINE float GetLookYawOffset() const { return LookRotationOffset.Yaw; }
+
+
+private: 
 	UPROPERTY()
 	class ACharacter* OwningCharacter;
 
@@ -53,4 +59,7 @@ private:
 	float YawSpeedSmoothLerpRate = 2.f;
 
 	FRotator BodyPrevRotation;
+
+	UPROPERTY()
+	FRotator LookRotationOffset;
 };
