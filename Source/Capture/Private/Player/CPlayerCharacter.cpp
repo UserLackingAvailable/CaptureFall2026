@@ -87,8 +87,4 @@ FVector ACPlayerCharacter::GetMoveForwardDirection() const
 	return FVector::CrossProduct(GetRightDirection(), FVector::UpVector);
 }
 
-UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
-{
-	return AbilitySystemComponent;
-}
 
