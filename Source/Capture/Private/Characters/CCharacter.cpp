@@ -4,6 +4,8 @@
 #include "Characters/CCharacter.h"
 #include "AbilitySystem/CAbilitySystemComponent.h"
 #include "AbilitySystem/CAttributeSet.h"
+#include "Components/WidgetComponent.h"
+#include "Widgets/OverheadStatusGauge.h"
 
 // Sets default values
 ACCharacter::ACCharacter()
@@ -14,12 +16,16 @@ ACCharacter::ACCharacter()
 	AbilitySystemComponent = CreateDefaultSubobject<UCAbilitySystemComponent>("AbilitySystemComponent");
 	CAttributeSet = CreateDefaultSubobject<UCAttributeSet>("CAttrubuteSet");
 
+
+	OverheadWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("OverheadWidgetComponent Widget ");
+	OverheadWidgetComponent->SetupAttachment(GetRootComponent());
 }
 
 void ACCharacter::ServerSideInit()
 {
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	AbilitySystemComponent->ApplyInitialEffects();
+	AbilitySystemComponent->GiveInitialAbilities();
 }
 
 void ACCharacter::ClientSideInit()
@@ -27,10 +33,25 @@ void ACCharacter::ClientSideInit()
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);  //has to be called on both server and client side.
 }
 
+bool ACCharacter::IsLocallyControlledByPlayer() const
+{
+	return IsLocallyControlled() && GetController()->IsPlayerController();
+}
+
+void ACCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	if (NewController && !NewController->IsPlayerController())  //checking if new controller is AI not player
+	{
+		ServerSideInit();
+	}
+}
+
 // Called when the game starts or when spawned
 void ACCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	ConfigureOverheadWidgetComponet();
 	
 }
 
@@ -51,5 +72,26 @@ void ACCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const  //ACCharacter = class
 {
 	return AbilitySystemComponent;
+}
+
+void ACCharacter::ConfigureOverheadWidgetComponet()
+{
+	if (!OverheadWidgetComponent)
+	{
+		return;
+	}
+
+	if (IsLocallyControlledByPlayer())
+	{
+		OverheadWidgetComponent->SetHiddenInGame(true);
+		return;
+	}
+
+	UOverheadStatusGauge* OverheadStatusGauge = Cast<UOverheadStatusGauge>(OverheadWidgetComponent->GetUserWidgetObject());
+	if (OverheadStatusGauge)
+	{
+		OverheadStatusGauge->ConfigureWithAbilitySystemComponent(GetAbilitySystemComponent());  //call function from OverheadStatus
+	}
+	OverheadWidgetComponent->SetHiddenInGame(false);
 }
 

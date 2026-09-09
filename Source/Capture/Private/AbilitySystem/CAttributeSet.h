@@ -17,6 +17,8 @@ class UCAttributeSet : public UAttributeSet
 public:
 	virtual void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const override;
 
+
+	//Allows \/ more functions like GetMaxHealthAttribute
 	ATTRIBUTE_ACCESSORS_BASIC(UCAttributeSet, Health)
 	ATTRIBUTE_ACCESSORS_BASIC(UCAttributeSet, MaxHealth)
 
