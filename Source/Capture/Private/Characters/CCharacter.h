@@ -18,7 +18,6 @@ public:
 
 	void ServerSideInit();
 	void ClientSideInit();
-
 	bool IsLocallyControlledByPlayer() const;
 
 	virtual void PossessedBy(AController* NewController) override;
@@ -48,7 +47,7 @@ private:
 	class UCAbilitySystemComponent* AbilitySystemComponent;
 
 	UPROPERTY()
-		class UCAttributeSet* CAttributeSet;
+	class UCAttributeSet* CAttributeSet;
 
   //------------------------------------------//
  //			         Widget                  //
@@ -58,5 +57,5 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "UI")
 	class UWidgetComponent* OverheadWidgetComponent;
 
-	void ConfigureOverheadWidgetComponet();
+	void ConfigureOverheadWidgetComponent();
 };

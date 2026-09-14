@@ -33,25 +33,10 @@ void ACCharacter::ClientSideInit()
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);  //has to be called on both server and client side.
 }
 
-bool ACCharacter::IsLocallyControlledByPlayer() const
-{
-	return IsLocallyControlled() && GetController()->IsPlayerController();
-}
-
-void ACCharacter::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-	if (NewController && !NewController->IsPlayerController())  //checking if new controller is AI not player
-	{
-		ServerSideInit();
-	}
-}
-
-// Called when the game starts or when spawned
 void ACCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	ConfigureOverheadWidgetComponet();
+	ConfigureOverheadWidgetComponent();
 	
 }
 
@@ -74,7 +59,7 @@ UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const  //ACCha
 	return AbilitySystemComponent;
 }
 
-void ACCharacter::ConfigureOverheadWidgetComponet()
+void ACCharacter::ConfigureOverheadWidgetComponent()
 {
 	if (!OverheadWidgetComponent)
 	{
@@ -94,4 +79,19 @@ void ACCharacter::ConfigureOverheadWidgetComponet()
 	}
 	OverheadWidgetComponent->SetHiddenInGame(false);
 }
+
+bool ACCharacter::IsLocallyControlledByPlayer() const
+{
+	return IsLocallyControlled() && GetController()->IsPlayerController();
+}
+
+void ACCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	if (NewController && !NewController->IsPlayerController())  //checking if new controller is AI not player
+	{
+		ServerSideInit();
+	}
+}
+
 
