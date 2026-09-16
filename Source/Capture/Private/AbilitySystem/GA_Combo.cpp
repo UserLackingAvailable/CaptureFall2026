@@ -3,7 +3,9 @@
 
 #include "AbilitySystem/GA_Combo.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "AbilitySystem/CAbilitySystemNativeTags.h"
+#include "GameplayTagsManager.h"
 
 UGA_Combo::UGA_Combo()
 {
@@ -21,15 +23,37 @@ void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 
 	UE_LOG(LogTemp, Warning, TEXT("Casting Combo Ability"))
 
-		if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))  //allows Server and Client  to see animation/montage
-		{
-			UAbilityTask_PlayMontageAndWait* PlayMontageAndWaitTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, ComboMontage);
+	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))  //allows Server and Client  to see animation/montage
+	{
+		UAbilityTask_PlayMontageAndWait* PlayMontageAndWaitTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, ComboMontage);
 
-			PlayMontageAndWaitTask->OnCompleted.AddDynamic(this, &UGA_Combo::K2_EndAbility);
-			PlayMontageAndWaitTask->OnCancelled.AddDynamic(this, &UGA_Combo::K2_EndAbility);
-			PlayMontageAndWaitTask->OnInterrupted.AddDynamic(this, &UGA_Combo::K2_EndAbility);
-			PlayMontageAndWaitTask->OnBlendOut.AddDynamic(this, &UGA_Combo::K2_EndAbility);
+		PlayMontageAndWaitTask->OnCompleted.AddDynamic(this, &UGA_Combo::K2_EndAbility);
+		PlayMontageAndWaitTask->OnCancelled.AddDynamic(this, &UGA_Combo::K2_EndAbility);
+		PlayMontageAndWaitTask->OnInterrupted.AddDynamic(this, &UGA_Combo::K2_EndAbility);
+		PlayMontageAndWaitTask->OnBlendOut.AddDynamic(this, &UGA_Combo::K2_EndAbility);
 
-			PlayMontageAndWaitTask->ReadyForActivation();
-		}
+		PlayMontageAndWaitTask->ReadyForActivation();
+
+		UAbilityTask_WaitGameplayEvent* WaitComboChangeEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, TAG_ABILITY_COMBO_CHANGE, nullptr, false, false);
+
+		WaitComboChangeEvent->EventReceived.AddDynamic(this, &UGA_Combo::HandleComboChange);
+
+		WaitComboChangeEvent->ReadyForActivation();
+	}
+}
+void UGA_Combo::HandleComboChange(FGameplayEventData EventData)
+{ 
+	FGameplayTag EventTag = EventData.EventTag;
+	if (EventTag == TAG_ABILITY_COMBO_CHANGE_End)
+	{
+		NextComboName = NAME_None;
+		UE_LOG(LogTemp, Warning, TEXT("Next combo is None"))
+		return;
+	}
+
+	TArray<FName> TagNames;
+	UGameplayTagsManager::Get().SplitGameplayTagFName(EventTag, TagNames);
+	NextComboName = TagNames.Last();
+
+	UE_LOG(LogTemp, Warning, TEXT("Next combo Name change to : %s"), *(NextComboName.ToString()))
 }
