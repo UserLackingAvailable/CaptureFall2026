@@ -3,6 +3,8 @@
 
 #include "Player/CPlayerCharacter.h"
 
+#include "AbilitySystemComponent.h"
+
 #include "Camera/CameraComponent.h"
 
 #include "GameFramework/SpringArmComponent.h"
@@ -10,6 +12,7 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Capture/Capture.h"
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
@@ -21,6 +24,8 @@ ACPlayerCharacter::ACPlayerCharacter()
 	ViewCam->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	CameraBoom->bUsePawnControlRotation = true;
 	bUseControllerRotationYaw = false;
+
+	CameraBoom->ProbeChannel = ECC_CameraBoom;
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(720.f);
@@ -49,6 +54,11 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ACPlayerCharacter::HandleLookInput);
 		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ACPlayerCharacter::HandleMoveInput);
 
+		for (const TPair<ECAbilityInputID, UInputAction*>& InputActionPair : GameplayAbilityInputActions)
+		{
+			EnhancedInputComponent->BindAction(InputActionPair.Value, ETriggerEvent::Triggered, this, &ACPlayerCharacter::HandleAbilityInputAction, InputActionPair.Key);
+		}
+
 	}
 	
 }
@@ -70,6 +80,21 @@ void ACPlayerCharacter::HandleMoveInput(const struct FInputActionValue& InputAct
 	InputAction.Normalize();
 
 	AddMovementInput(GetMoveForwardDirection() * InputAction.Y + GetRightDirection() * InputAction.X);
+}
+
+void ACPlayerCharacter::HandleAbilityInputAction(const FInputActionValue& InputActionValue, ECAbilityInputID InputID)
+{
+	bool bPressed = InputActionValue.Get<bool>();
+	if (bPressed)
+	{
+		GetAbilitySystemComponent()->AbilityLocalInputPressed((int32)InputID);
+
+	}
+	else
+	{
+		GetAbilitySystemComponent()->AbilityLocalInputReleased((int32)InputID);
+
+	}
 }
 
 FVector ACPlayerCharacter::GetRightDirection() const
