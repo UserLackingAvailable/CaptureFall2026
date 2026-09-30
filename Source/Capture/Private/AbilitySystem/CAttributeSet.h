@@ -17,13 +17,15 @@ class UCAttributeSet : public UAttributeSet
 public:
 	virtual void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const override;
 
-
 	//Allows \/ more functions like GetMaxHealthAttribute
 	ATTRIBUTE_ACCESSORS_BASIC(UCAttributeSet, Health)
 	ATTRIBUTE_ACCESSORS_BASIC(UCAttributeSet, MaxHealth)
 
 	ATTRIBUTE_ACCESSORS_BASIC(UCAttributeSet, Mana)
 	ATTRIBUTE_ACCESSORS_BASIC(UCAttributeSet, MaxMana)
+
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
 
 private:

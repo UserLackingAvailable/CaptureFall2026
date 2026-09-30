@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameplayCueNotify_Static.h"
 #include "GC_HitMontage.generated.h"
-
 /**
  * 
  */
