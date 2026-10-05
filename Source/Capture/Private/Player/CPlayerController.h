@@ -4,22 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "GenericTeamAgentInterface.h"
 #include "CPlayerController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ACPlayerController : public APlayerController
+class ACPlayerController : public APlayerController , public IGenericTeamAgentInterface //represents player -> ACPlayerController  Using GenericTeamAgentInterface for Labeling Team (AI Team Info)
 {
 	GENERATED_BODY()
 	
 public:
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	//On Possess is Only called on server
 	virtual void OnPossess(APawn* NewPawn) override;
 
 	//Called when clients/or listening server received their pawn on the client machine. not called on dedicated server!
 	virtual void AcknowledgePossession(APawn* NewPawn) override;
+
+////////////////////////////////////////////////////////////////////WIDGET
 
 private:
 	UPROPERTY()
@@ -33,4 +38,14 @@ private:
 
 	void SpawnGameplayWidget();
 
+
+////////////////////////////////////////////////////////////////////TEAMS
+
+public: 
+	virtual void SetGenericTeaMId(const FGenericTeamId& NewTeamID);
+	virtual FGenericTeamId GetGenericTeamId() const;
+
+private:
+	UPROPERTY(Replicated)
+	 FGenericTeamId TeamId;
 };

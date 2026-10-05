@@ -6,16 +6,19 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayTagContainer.h"
+#include "GenericTeamAgentInterface.h"
 #include "CCharacter.generated.h"
 
 UCLASS()
-class ACCharacter : public ACharacter, public IAbilitySystemInterface
+class ACCharacter : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
 	ACCharacter();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void ServerSideInit();
 	void ClientSideInit();
@@ -36,9 +39,9 @@ public:
 
 
 
-	//------------------------------------------//
-   //			 Gameplay Ability	           //
-  //------------------------------------------//
+
+//////////////////////////////////////////////////////////////////// Gameplay Ability
+
 
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
@@ -56,29 +59,46 @@ private:
 	UPROPERTY()
 	class UCAttributeSet* CAttributeSet;
 
-   //------------------------------------------//
-  //			         Death & Respawn      //
- //------------------------------------------//
+//////////////////////////////////////////////////////////////////// Death & Respawn
+
 
 private:
 	void StartDeathSequence();
 	void Repspawn();
+	bool IsDead() const;
+
+	void SetRagdoolEnabled(bool bIsEnabled);
+
+	FTransform SkeletalMeshRelativeTransform;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Death")
 	UAnimMontage* DeathMontage;
 	UAnimMontage* RespawnMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Death")
+	float DeathAnimationTimeOffset = -1.f;
+
 	void PlayDeathMontage();
-	void PlayRepsawnMontage();
 
+	FTimerHandle DeathAnimationTimerHandle;
+	void DeathAnimationFinished();
 
-
-  //------------------------------------------//
- //			         Widget                  //
-//------------------------------------------//
+////////////////////////////////////////////////////////////////////Widget
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "UI")
 	class UWidgetComponent* OverheadWidgetComponent;
 
 	void ConfigureOverheadWidgetComponent();
+
+////////////////////////////////////////////////////////////////////TEAMS
+
+public:
+	virtual void SetGenericTeaMId(const FGenericTeamId& NewTeamID);
+	virtual FGenericTeamId GetGenericTeamId() const;
+
+private:
+	UPROPERTY(Replicated)
+	FGenericTeamId TeamId;
+
 };
