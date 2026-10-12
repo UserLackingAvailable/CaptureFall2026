@@ -19,4 +19,10 @@ public:
 	virtual APlayerController* SpawnPlayerController(ENetRole InRemoteRole, const FString& Options) override;
 
 	FGenericTeamId GetTeamIdForPLayer(const APlayerController* PlayerConrtoller);
+
+private:
+	AActor* FindNectStartSpotForTeam(const FGenericTeamId& TeamId);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Team")
+	TMap<FGenericTeamId, FName> TeamPlayerStartTagMap;
 };

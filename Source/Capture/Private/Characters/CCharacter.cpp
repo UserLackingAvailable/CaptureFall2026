@@ -8,6 +8,10 @@
 #include "Components/WidgetComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Capture/Capture.h"
+
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
+
 #include "Widgets/OverheadStatusGauge.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -27,6 +31,9 @@ ACCharacter::ACCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_CameraBoom, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_CameraBoom, ECR_Ignore);
+
+	AIPerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>("Ai Perception Stimuli Source"); //create
+
 }
 
 void ACCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -52,6 +59,8 @@ void ACCharacter::BeginPlay()
 	Super::BeginPlay();
 	ConfigureOverheadWidgetComponent();
 	BindGASDelegates();
+
+	AIPerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass()); //set at start
 }
 
 // Called every frame
@@ -83,18 +92,6 @@ void ACCharacter::BindGASDelegates()
 	AbilitySystemComponent->RegisterGameplayTagEvent(TAG_STAT_DEAD).AddUObject(this, &ACCharacter::DeathTagUpdated); //When Tag has changed called
 }
 
-void ACCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 Count)
-{
-	if (Count != 0)
-	{
-		StartDeathSequence();
-	}
-	else
-	{
-		Repspawn();
-	}
-}
-
 void ACCharacter::StartDeathSequence()
 {
 
@@ -102,7 +99,7 @@ void ACCharacter::StartDeathSequence()
 	UE_LOG(LogTemp, Warning, TEXT("Start Death Squence"))
 		PlayDeathMontage();
 
-
+	SetAIPerceptionStimuliSourceEnabled(false);
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -117,6 +114,7 @@ void ACCharacter::StartDeathSequence()
 void ACCharacter::Repspawn()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Repsawn"))
+	SetAIPerceptionStimuliSourceEnabled(true);
 	SetRagdoolEnabled(false);
 
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
@@ -131,8 +129,11 @@ void ACCharacter::Repspawn()
 	//doing both on client and server side.
 	CAttributeSet->SetHealth(CAttributeSet->GetMaxHealth());
 	StopAnimMontage(DeathMontage);
+	if (HasAuthority() && GetController()->StartSpot.IsValid())
+	{
+		SetActorTransform(GetController()->StartSpot->GetActorTransform());
+	}
 	
-
 }
 
 bool ACCharacter::IsDead() const
@@ -196,14 +197,14 @@ void ACCharacter::ConfigureOverheadWidgetComponent()
 	OverheadWidgetComponent->SetHiddenInGame(false);
 }
 
-void ACCharacter::SetGenericTeaMId(const FGenericTeamId& NewTeamID)
+void ACCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 {
 	TeamId = NewTeamID;
 }
 
 FGenericTeamId ACCharacter::GetGenericTeamId() const
 {
-	return FGenericTeamId();
+	return TeamId;
 }
 
 bool ACCharacter::IsLocallyControlledByPlayer() const
@@ -220,4 +221,29 @@ void ACCharacter::PossessedBy(AController* NewController)
 	}
 }
 
+void ACCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 Count)
+{
+	if (Count != 0)
+	{
+		StartDeathSequence();
+	}
+	else
+	{
+		Repspawn();
+	}
+}
 
+void ACCharacter::SetAIPerceptionStimuliSourceEnabled(bool BIsStimuliSourceEnabled)
+{
+	if (!AIPerceptionStimuliSourceComponent)
+		return;
+
+	if (BIsStimuliSourceEnabled)
+	{
+		AIPerceptionStimuliSourceComponent->RegisterWithPerceptionSystem(); //register
+	}
+	else
+	{
+		AIPerceptionStimuliSourceComponent->UnregisterFromPerceptionSystem(); //unregister
+	}
+}

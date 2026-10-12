@@ -42,8 +42,8 @@ private:
 ////////////////////////////////////////////////////////////////////TEAMS
 
 public: 
-	virtual void SetGenericTeaMId(const FGenericTeamId& NewTeamID);
-	virtual FGenericTeamId GetGenericTeamId() const;
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;  //dont forget you are overriding
 
 private:
 	UPROPERTY(Replicated)

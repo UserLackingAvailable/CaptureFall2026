@@ -4,10 +4,12 @@
 #include "AbilitySystem/CGameplayAbility.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius, bool bDrawDebug, bool bIgnoreSelf) const
+TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius, ETeamAttitude::Type TargetTeamAttitute, bool bDrawDebug, bool bIgnoreSelf) const
 {
     TArray<FHitResult> OutResults;
     TSet<AActor*> HitActors;
+
+    IGenericTeamAgentInterface* OwnerTeamInterface = Cast<IGenericTeamAgentInterface>(GetAvatarActorFromActorInfo());
 
     for (const TSharedPtr<FGameplayAbilityTargetData>& TargetData : TargetDataHandle.Data)
     {
@@ -32,6 +34,14 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(c
             if (HitActors.Contains(Result.GetActor()))
             {
                 continue;
+            }
+
+            if (OwnerTeamInterface)
+            {
+                if (OwnerTeamInterface->GetTeamAttitudeTowards(*Result.GetActor()) != TargetTeamAttitute)
+                {
+                    continue;
+                }
             }
 
             HitActors.Add(Result.GetActor());

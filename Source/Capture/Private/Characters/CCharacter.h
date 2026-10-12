@@ -61,11 +61,12 @@ private:
 
 //////////////////////////////////////////////////////////////////// Death & Respawn
 
+public:
+	bool IsDead() const;  //moved from private for now
 
 private:
 	void StartDeathSequence();
 	void Repspawn();
-	bool IsDead() const;
 
 	void SetRagdoolEnabled(bool bIsEnabled);
 
@@ -94,11 +95,19 @@ private:
 ////////////////////////////////////////////////////////////////////TEAMS
 
 public:
-	virtual void SetGenericTeaMId(const FGenericTeamId& NewTeamID);
-	virtual FGenericTeamId GetGenericTeamId() const;
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 private:
 	UPROPERTY(Replicated)
 	FGenericTeamId TeamId;
 
+
+////////////////////////////////////////////////////////////////////AI PERCEPTION
+
+private:
+	UPROPERTY()
+	class UAIPerceptionStimuliSourceComponent* AIPerceptionStimuliSourceComponent;
+
+	void SetAIPerceptionStimuliSourceEnabled(bool BIsStimuliSourceEnabled);
 };
