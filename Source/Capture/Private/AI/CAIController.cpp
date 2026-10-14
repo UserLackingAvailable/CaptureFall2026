@@ -62,21 +62,6 @@ void ACAIController::BeginPlay()
 	}
 }
 
-void ACAIController::TargetPerceptionUpdated(AActor* TargetActor, FAIStimulus Stimulus)
-{
-	if (Stimulus.WasSuccessfullySensed())
-	{
-		if (!GetCurrentTarget()) //sets target
-		{
-			SetCurrentTarget(TargetActor);
-		}
-		else
-		{
-			ForgetActorIfDead(TargetActor);
-		}
-	}
-}
-
 void ACAIController::TargetForgotten(AActor* ForgottenActor)
 {
 	if (!ForgottenActor)
@@ -108,31 +93,6 @@ AActor* ACAIController::GetNextPerceivedActor() const
 	return nullptr;
 }
 
-const UObject* ACAIController::GetCurrentTarget() const
-{
-	if (const UBlackboardComponent* BlackboardComponent = GetBlackboardComponent())
-	{
-		BlackboardComponent->GetValueAsObject(BlackboardTargetKeyName);
-	}
-
-	return nullptr;
-}
-
-void ACAIController::SetCurrentTarget(AActor* NewTarget)
-{
-	if (UBlackboardComponent* BlackboardComponent = GetBlackboardComponent())
-	{
-		if (NewTarget)
-		{
-			BlackboardComponent->SetValueAsObject(BlackboardTargetKeyName, NewTarget);  //Having issue that if player out of bounds after age maxed ai not forgetting player/ setting to none.
-		}
-		else
-		{
-			BlackboardComponent->ClearValue(BlackboardTargetKeyName);
-		}
-	}
-}
-
 void ACAIController::ForgetActorIfDead(AActor* ActorToForget)
 {
 	const UAbilitySystemComponent* ActorASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(ActorToForget);
@@ -158,4 +118,46 @@ void ACAIController::ForgetActorIfDead(AActor* ActorToForget)
 	}
 
 }
+
+void ACAIController::TargetPerceptionUpdated(AActor* TargetActor, FAIStimulus Stimulus)
+{
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		if (!GetCurrentTarget()) //sets target
+		{
+			SetCurrentTarget(TargetActor);
+		}
+		else
+		{
+			ForgetActorIfDead(TargetActor);
+		}
+	}
+}
+
+
+const UObject* ACAIController::GetCurrentTarget() const
+{
+	if (const UBlackboardComponent* BlackboardComponent = GetBlackboardComponent())
+	{
+		return BlackboardComponent->GetValueAsObject(BlackboardTargetKeyName);  //forgot to return which caused switching issue
+	}
+
+	return nullptr;
+}
+
+void ACAIController::SetCurrentTarget(AActor* NewTarget)
+{
+	if (UBlackboardComponent* BlackboardComponent = GetBlackboardComponent())
+	{
+		if (NewTarget)
+		{
+			BlackboardComponent->SetValueAsObject(BlackboardTargetKeyName, NewTarget);  //Having issue that if player out of bounds after age maxed ai not forgetting player/ setting to none.
+		}
+		else
+		{
+			BlackboardComponent->ClearValue(BlackboardTargetKeyName);
+		}
+	}
+}
+
 
