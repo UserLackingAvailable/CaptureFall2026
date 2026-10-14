@@ -5,6 +5,8 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Components/StateTreeAIComponent.h"
+
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/CAbilitySystemNativeTags.h"
@@ -30,6 +32,7 @@ ACAIController::ACAIController()
 	SightConfig->PeripheralVisionAngleDegrees = 180.f;
 
 	AIPerceptionComponent->ConfigureSense(*SightConfig);
+	StateTreeComponent = CreateDefaultSubobject<UStateTreeAIComponent>("State Tree Component");
 }
 
 void ACAIController::OnPossess(APawn* NewPawn)
@@ -47,7 +50,11 @@ void ACAIController::OnPossess(APawn* NewPawn)
 void ACAIController::BeginPlay()
 {
 	Super::BeginPlay();
-	RunBehaviorTree(BehavoirTree);
+	if (BehavoirTree)
+	{
+		RunBehaviorTree(BehavoirTree);  //have to run behaviortree unlike statetree where is attached in bp
+		StateTreeComponent->Deactivate();
+	}
 
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ACAIController::TargetPerceptionUpdated); //adds updated for AI
 	AIPerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &ACAIController::TargetForgotten); //adds forgetting for AI
@@ -142,11 +149,18 @@ const UObject* ACAIController::GetCurrentTarget() const
 		return BlackboardComponent->GetValueAsObject(BlackboardTargetKeyName);  //forgot to return which caused switching issue
 	}
 
-	return nullptr;
+	return CurrentTarget;
 }
 
 void ACAIController::SetCurrentTarget(AActor* NewTarget)
 {
+	if (NewTarget != CurrentTarget) //if newtarget isnt current means target changed
+	{
+		CurrentTarget = NewTarget; //set currenttarget to newtarget
+		StateTreeComponent->SendStateTreeEvent(TAG_PERCEPTION_TARGET_CHANGE); //using CAbilitySystemNativeTags to use events for StateTree to notif of change
+
+	}
+	
 	if (UBlackboardComponent* BlackboardComponent = GetBlackboardComponent())
 	{
 		if (NewTarget)

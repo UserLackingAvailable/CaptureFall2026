@@ -28,8 +28,11 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Perception")
 	class UAISenseConfig_Sight* SightConfig;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Perception")
+	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
 	class UBehaviorTree* BehavoirTree;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
+	class UStateTreeAIComponent* StateTreeComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
 	FName BlackboardTargetKeyName = "Target";
@@ -53,4 +56,7 @@ private:
 	AActor* GetNextPerceivedActor() const;
 
 	void ForgetActorIfDead(AActor* ActorToForget);
+
+	UPROPERTY(VisibleAnywhere, meta=(AllowPrivateAccess="true"))
+	AActor* CurrentTarget;
 };

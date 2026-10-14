@@ -14,5 +14,8 @@ UE_DEFINE_GAMEPLAY_TAG_COMMENT(TAG_ABILITY_COMBO_CHANGE_End, "ability.combo.chan
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(TAG_ABILITY_COMBO_DAMAGE, "ability.combo.damage", "tag to send the combo ability to ask it to do damage")
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(TAG_STAT_DEAD, "stat.dead", "tag added to the character when they are dead")
 
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(TAG_PERCEPTION_TARGET_CHANGE, "perception.target.change", "Event tag used to sent to State Tree to tell it target has changed")
+
+
 
 
