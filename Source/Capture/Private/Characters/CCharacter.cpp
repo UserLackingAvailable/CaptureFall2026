@@ -243,7 +243,7 @@ void ACCharacter::AimTagUpdated(const FGameplayTag Tag, int32 Count)
 void ACCharacter::SetIsAiming(bool bIsAiming)
 {
 	bUseControllerRotationYaw = bIsAiming;
-	//GetCharacterMovement()->bOrientRotationMovement = !bIsAiming;
+	GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
 }
 
 void ACCharacter::SetAIPerceptionStimuliSourceEnabled(bool BIsStimuliSourceEnabled)
