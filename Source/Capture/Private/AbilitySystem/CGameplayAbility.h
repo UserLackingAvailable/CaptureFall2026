@@ -20,4 +20,6 @@ protected:
 		ETeamAttitude::Type TargetTeamAttitute = ETeamAttitude::Hostile,
 		bool bDrawDebug = false, 
 		bool bIgnoreSelf = true) const;
+
+	UCGameplayAbility();
 };

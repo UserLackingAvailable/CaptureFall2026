@@ -25,6 +25,8 @@ void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		return;
 	}
 
+	NextComboName = NAME_None;  //add once CGameplayAbility is correct
+
 	UE_LOG(LogTemp, Warning, TEXT("Casting Combo Ability"))
 
 	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))  //allows Server and Client  to see animation/montage

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "GameplayTagContainer.h"
 #include "CAnimInstance.generated.h"
 
 /**
@@ -20,7 +21,10 @@ public:
 	// for the bulk of the work to be done in NativeThreadSafeUpdateAnimation.
 	virtual void NativeUpdateAnimation(float DeltaSeconds);
 
-	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))  //ThreadSafe: makes sure only reading readable var to prevent multi threads reading the same var.
+	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))
+	FORCEINLINE bool ShouldDoFullyBody() const { return !IsMoving() && !bIsAiming; }  //new
+
+	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))  //ThreadSafe: makes sure only reading readable var to prevent multi threads reading the same var.
 	FORCEINLINE bool IsMoving() const { return Speed > 0; } //Inline function: slightly better performance, copy and paste line into where its being called, skipping function call.
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))  //ThreadSafe: makes sure only reading readable var.
@@ -55,6 +59,15 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess))
 	float SmoothedYawSpeed;
 
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess))  //double check this
+	bool bIsAiming;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess))
+	float ForwardSpeed;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess))
+	float RightSpeed;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	float YawSpeedSmoothLerpRate = 2.f;
 
@@ -62,4 +75,6 @@ private:
 
 	UPROPERTY()
 	FRotator LookRotationOffset;
+
+	void AimTagUpdated(const FGameplayTag Tag, int_fast32_t NewCount);
 };

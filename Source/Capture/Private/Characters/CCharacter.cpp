@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+//CHECK
 
 #include "Characters/CCharacter.h"
 #include "AbilitySystem/CAbilitySystemComponent.h"
@@ -61,6 +62,7 @@ void ACCharacter::BeginPlay()
 	BindGASDelegates();
 
 	AIPerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass()); //set at start
+	AbilitySystemComponent->RegisterGameplayTagEvent(TAG_STAT_AIMING).AddUObject(this, &ACCharacter::AimTagUpdated); //check
 }
 
 // Called every frame
@@ -231,6 +233,17 @@ void ACCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 Count)
 	{
 		Repspawn();
 	}
+}
+
+void ACCharacter::AimTagUpdated(const FGameplayTag Tag, int32 Count)
+{
+	SetIsAiming(Count != 0);
+}
+
+void ACCharacter::SetIsAiming(bool bIsAiming)
+{
+	bUseControllerRotationYaw = bIsAiming;
+	//GetCharacterMovement()->bOrientRotationMovement = !bIsAiming;
 }
 
 void ACCharacter::SetAIPerceptionStimuliSourceEnabled(bool BIsStimuliSourceEnabled)
