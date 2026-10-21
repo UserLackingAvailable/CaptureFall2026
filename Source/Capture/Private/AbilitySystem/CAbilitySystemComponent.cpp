@@ -8,6 +8,10 @@
 UCAbilitySystemComponent::UCAbilitySystemComponent()
 {
 	GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetHealthAttribute()).AddUObject(this, &UCAbilitySystemComponent::HealthChanged);
+
+	GenericConfirmInputID = (int32)ECAbilityInputID::Confirm;  //telling what confirm and cancel are but not hooked up at
+	GenericCancelInputID = (int32)ECAbilityInputID::Cancel; //make sure the Generic is the right cancel and confirm
+
 }
 
 void UCAbilitySystemComponent::ApplyInitialEffects()

@@ -4,10 +4,14 @@
 #include "AbilitySystem/GA_GroundBlast.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "AbilitySystem/CAbilitySYstemNativeTags.h"
+#include "Abilities/Tasks/AbilityTask_WaitTargetData.h"
+#include "AbilitySystem/TA_GroundPick.h" //wont know TargetActorClass from parent within include
+#include "AbilitySystemBlueprintLibrary.h"
 
 UGA_GroundBlast::UGA_GroundBlast()
 {
 	ActivationOwnedTags.AddTag(TAG_STAT_AIMING);
+	BlockAbilitiesWithTag.AddTag(TAG_ABILITY_BASICATTACK);
 }
 
 void UGA_GroundBlast::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivateInfo, const FGameplayEventData* TriggerEventData)
@@ -25,6 +29,43 @@ void UGA_GroundBlast::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
 	PlayMontageAndWait->OnCompleted.AddDynamic(this, &UGA_GroundBlast::K2_EndAbility);
 
 	PlayMontageAndWait->ReadyForActivation();
+
+	UAbilityTask_WaitTargetData* WaitTargetData =
+		UAbilityTask_WaitTargetData::WaitTargetData(this, NAME_None, EGameplayTargetingConfirmation::UserConfirmed, TargetActorClass); //needs include for target
+
+	WaitTargetData->ValidData.AddDynamic(this, &UGA_GroundBlast::TargetConfirmed);
+	WaitTargetData->Cancelled.AddDynamic(this, &UGA_GroundBlast::TargetCancelled);
+	WaitTargetData->ReadyForActivation(); //has to be started before spawning
+
+	AGameplayAbilityTargetActor* TargetActor;
+	WaitTargetData->BeginSpawningActor(this, TargetActorClass, TargetActor);
+	//config it here
+	WaitTargetData->FinishSpawningActor(this, TargetActor);
+
+
+
+
+}
+
+void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Target Confirmed"));
+	//for (AActor* TargetActor : UAbilitySystemBlueprintLibrary::GetAllActorsFromTargetData(TargetDataHandle))
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Found Target : % s"), *(TargetActor->GetName()));
+	//}
+	if(K2_CommitAbility())
+	{
+		BP_ApplyGameplayEffectToTarget(TargetDataHandle, DamageEffect);
+	}
+
+		K2_EndAbility();
+}
+
+void UGA_GroundBlast::TargetCancelled(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Target Cancelled"));
+		K2_EndAbility();
 
 
 }

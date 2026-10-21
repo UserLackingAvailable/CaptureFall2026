@@ -30,8 +30,13 @@ ACCharacter::ACCharacter()
 	OverheadWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("OverheadWidgetComponent Widget ");
 	OverheadWidgetComponent->SetupAttachment(GetRootComponent());
 
+	//Camera
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_CameraBoom, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_CameraBoom, ECR_Ignore);
+
+	//Target
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Target, ECR_Ignore);  //suppose to make it so the target can have spehre collid
+	GetMesh()->SetCollisionResponseToChannel(ECC_Target, ECR_Ignore);
 
 	AIPerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>("Ai Perception Stimuli Source"); //create
 
@@ -244,6 +249,12 @@ void ACCharacter::SetIsAiming(bool bIsAiming)
 {
 	bUseControllerRotationYaw = bIsAiming;
 	GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
+	OnAimStatChanged(bIsAiming);
+}
+
+void ACCharacter::OnAimStatChanged(bool bNewIsAiming)
+{
+	//override in child class
 }
 
 void ACCharacter::SetAIPerceptionStimuliSourceEnabled(bool BIsStimuliSourceEnabled)

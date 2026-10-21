@@ -6,3 +6,5 @@
 
 
 #define ECC_CameraBoom ECC_GameTraceChannel1  //Takes channel trace create in engine and renaming it to ECC_CameraBoom
+#define ECC_Target ECC_GameTraceChannel2  //Takes channel trace create in engine and renaming it to ECC_CameraBoom
+
